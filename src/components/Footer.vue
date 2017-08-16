@@ -3,7 +3,7 @@
   <div class="container">
     <div class="footer-main">
       <p class="footer-main-title">Bitcoineum Mining Pool</p>
-      <a href="#" target="_blank" class="footer-main-link">Bitcoineum</a>
+      <a href="http://www.bitcoineum.com/" target="_blank" class="footer-main-link">Bitcoineum</a>
       <a href="#" target="_blank" class="footer-main-link">About Us</a>
     </div>
     <div class="footer-social">

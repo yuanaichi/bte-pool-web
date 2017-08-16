@@ -147,17 +147,17 @@ import TopHeader from '../../components/TopHeader.vue'
 import Foot from '../../components/Footer.vue'
 import {default as Web3} from 'web3'
 
-window.defaultWeb3 = new Web3(new Web3.providers.HttpProvider("https://web3.token.im"));
-window.defaultWeb3.currentProvider.isDefaultProvider = true;
+window.defaultWeb3 = new Web3(new Web3.providers.HttpProvider("https://web3.token.im"))
+window.defaultWeb3.currentProvider.isDefaultProvider = true
 
 window.addEventListener('load', function() {
   if (typeof window.web3 !== 'undefined') {
-    window.web3 = new Web3(window.web3.currentProvider);
+    window.web3 = new Web3(window.web3.currentProvider)
   } else {
     // set the provider you want from Web3.providers
-    window.web3 = defaultWeb3;
+    window.web3 = defaultWeb3
   }
-});
+})
 
 export default {
   components: {
@@ -205,7 +205,7 @@ export default {
   mounted () {
     var self = this
     var t = setInterval(function() {
-      console.log(window.web3);
+      console.log(window.web3)
       if (window.web3) {
         clearInterval(t)
         self.loadData()
@@ -216,13 +216,13 @@ export default {
   },
   methods: {
     getPoolInstance() {
-      return window.web3.eth.contract(this.poolContractABI).at(this.poolContractAddress);
+      return window.web3.eth.contract(this.poolContractABI).at(this.poolContractAddress)
     },
     getDefaultPoolInstance() {
-      return window.defaultWeb3.eth.contract(this.poolContractABI).at(this.poolContractAddress);
+      return window.defaultWeb3.eth.contract(this.poolContractABI).at(this.poolContractAddress)
     },
     getBteInstance() {
-      return window.defaultWeb3.eth.contract(this.bteContractABI).at(this.bteContractAddress);
+      return window.defaultWeb3.eth.contract(this.bteContractABI).at(this.bteContractAddress)
     },
     loadData () {
       var self = this
@@ -258,8 +258,8 @@ export default {
       defaultPoolInstance.current_epoch((err, epoch_number) => {
         var currentEpoch = epoch_number.toNumber()
         defaultPoolInstance.epochs(currentEpoch, (err, epoch) => {
-          var remainingEpochBlocks = defaultPoolInstance.remaining_epoch_blocks.call(currentEpoch).toNumber();
-          var currentBlock = 100 - remainingEpochBlocks;
+          var remainingEpochBlocks = defaultPoolInstance.remaining_epoch_blocks.call(currentEpoch).toNumber()
+          var currentBlock = 100 - remainingEpochBlocks
           self.epoch = {
             currentEpoch: currentEpoch,
             minedBlocks: epoch[0].toNumber(),
@@ -273,8 +273,8 @@ export default {
             currentBlock: currentBlock,
             remainingBlocks: remainingEpochBlocks
           }
-        });
-      });
+        })
+      })
 
       //pool fee
       defaultPoolInstance.pool_percentage((err, pool_percentage) => {
@@ -282,6 +282,10 @@ export default {
       })
 
       this.searchUserAddress = window.STORAGE.getItem('searchUserAddress')
+
+      if (this.searchUserAddress) {
+        this.handleSearchUser()
+      }
     },
     getEpochCost() {
       if (this.epoch.totalAttempt <= 0) {
@@ -295,12 +299,12 @@ export default {
         this.$message({
           message: '销毁的ether数量要大于0, 小于1000ether',
           type: 'warning'
-        });
+        })
         return
       }
 
-      var defaultPoolInstance = this.getDefaultPoolInstance();
-      var currentEpoch = defaultPoolInstance.current_epoch();
+      var defaultPoolInstance = this.getDefaultPoolInstance()
+      var currentEpoch = defaultPoolInstance.current_epoch()
 
       var user = defaultPoolInstance.users.call(this.selectedAccount)
 
@@ -309,15 +313,15 @@ export default {
         this.$message({
           message: '当前epoch已经在挖，每个epoch只能挖一次',
           type: 'danger'
-        });
+        })
         return
       }
 
-      var remainingEpochBlocks = defaultPoolInstance.remaining_epoch_blocks.call(currentEpoch);
+      var remainingEpochBlocks = defaultPoolInstance.remaining_epoch_blocks.call(currentEpoch)
       console.log("current epoch:", currentEpoch)
       console.log("remaining epoch blocks:", remainingEpochBlocks)
       var content = '当前epoch：' + currentEpoch + '， 剩余blocks：' + remainingEpochBlocks +
-        '，共销毁：' + this.burnEther  + ' ether， 每份销毁： ' + (this.burnEther / remainingEpochBlocks).toFixed(4) + ' ether';
+        '，共销毁：' + this.burnEther  + ' ether， 每份销毁： ' + (this.burnEther / remainingEpochBlocks).toFixed(4) + ' ether'
 
       var transObj = {
         to: this.poolContractAddress,
@@ -339,11 +343,11 @@ export default {
         self.miningButtonDisabled = true
         window.web3.eth.sendTransaction(transObj, (err) => {
           console.log(arguments)
-          self.miningButtonDisabled = false;
-        });
+          self.miningButtonDisabled = false
+        })
       }).catch(() => {
-          console.log("cancel mining");
-      });
+          console.log("cancel mining")
+      })
     },
     selectMiningAction (action) {
       this.miningAction = action
@@ -356,43 +360,48 @@ export default {
       }
     },
     redeem() {
+      this.redeemButtonDisabled = true
       var self = this
-      var defaultPoolInstance = this.getDefaultPoolInstance();
-      var currentEpoch = defaultPoolInstance.current_epoch();
+      var defaultPoolInstance = this.getDefaultPoolInstance()
       if (!this.selectedAccount) {
-        this.$message.error('请先选择账户');
+        this.$message.error('请先选择账户')
+        this.redeemButtonDisabled = false
         return
       }
 
+      var currentEpoch = defaultPoolInstance.current_epoch()
       var user = defaultPoolInstance.users.call(this.selectedAccount)
 
       // check user epoch
       if (user[0].toNumber() >= currentEpoch) {
-        this.$message.error('现在还不能赎回');
+        this.$message.error('现在还不能赎回')
+        this.redeemButtonDisabled = false
         return
       }
       //check isRedeem
       if (user[5]) {
         this.$message.error('当前epoch已经赎回过了')
+        this.redeemButtonDisabled = false
         return
       }
 
       // check balance
-      var userBteBalance = defaultPoolInstance.balanceOf.call(this.selectedAccount).toNumber();
+      var userBteBalance = defaultPoolInstance.balanceOf.call(this.selectedAccount).toNumber()
       if (userBteBalance <= 0) {
-        this.$message.error('用户BTE余额为0，无需赎回');
+        this.$message.error('用户BTE余额为0，无需赎回')
+        this.redeemButtonDisabled = false
         return
       }
 
-      var poolInstance = this.getPoolInstance();
-      this.redeemButtonDisabled = true;
+      var poolInstance = this.getPoolInstance()
+
       poolInstance.redeem({
         from: this.selectedAccount,
         gas: 120000,
         value: 0,
 				gasPrice: web3.toWei(this.gasPrice, 'gwei')
       }, (error) => {
-        console.log("redeem error:", error);
+        console.log("redeem error:", error)
         self.redeemButtonDisabled = false
       })
     },
@@ -403,7 +412,7 @@ export default {
         this.$message({
           message: '请填写挖矿账户',
           type: 'warning'
-        });
+        })
         return
       }
       window.STORAGE.setItem('searchUserAddress', this.searchUserAddress)
