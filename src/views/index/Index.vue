@@ -3,6 +3,11 @@
     <TopHeader />
     <div class="main-cnt">
       <div class="page-container">
+        <el-alert
+        title="请注意当前为测试版本，不要充值太多ether，有问题到群里反馈。"
+        type="warning"
+        show-icon>
+        </el-alert>
           <p>
             合约地址
             <el-tag type="gray">
